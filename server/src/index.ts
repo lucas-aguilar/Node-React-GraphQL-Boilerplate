@@ -4,14 +4,23 @@ import * as express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
-import { UserResolver } from './UserResolver';
 import * as cookieParser from 'cookie-parser';
 import { verify } from 'jsonwebtoken';
+import * as cors from 'cors';
+
 import { User } from './entity/User';
+import { UserResolver } from './UserResolver';
 import { createAccessToken, createRefreshToken } from './util/auth';
 import { sendRefreshToken } from './util/sendRefreshToken';
 const startServer = async () => {
   const app = express();
+  app.use(
+    // before applying middlewares
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+    })
+  );
   app.use(cookieParser());
   // Special route for refreshing out of GraphQL
   app.post('/refresh_token', async (req, res) => {
@@ -35,6 +44,11 @@ const startServer = async () => {
       return res.send({ ok: false, accessToken: '' });
     }
 
+    console.log('payload.tokenVersion:');
+    console.log(payload.tokenVersion);
+
+    console.log('user.tokenVersion:');
+    console.log(user.tokenVersion);
     if (user.tokenVersion !== payload.tokenVersion) {
       return res.send({ ok: false, accessToken: '' });
     }
@@ -53,7 +67,7 @@ const startServer = async () => {
     }),
     context: ({ req, res }) => ({ req, res }),
   });
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, cors: false });
 
   app.listen(4000, () =>
     console.log(`Server ready at http://localhost:4000${server.graphqlPath}`)

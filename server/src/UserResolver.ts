@@ -31,10 +31,16 @@ export class UserResolver {
   @UseMiddleware(isAuth)
   bye(@Ctx() { payload }: MyContext) {
     console.log(payload);
-    return `Your user id id: ${payload!.userId}`;
+    return `Your user id is: ${payload!.userId}`;
+  }
+
+  @Query(() => String)
+  hello() {
+    return `hi!`;
   }
 
   @Query(() => [User])
+  @UseMiddleware(isAuth)
   users() {
     return User.find();
   }
@@ -51,6 +57,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
   async register(
     @Arg('email') email: string,
     @Arg('password') password: string
