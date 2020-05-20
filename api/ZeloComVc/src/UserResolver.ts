@@ -15,7 +15,7 @@ import { hash, compare } from 'bcryptjs';
 import { User } from './entity/User';
 import { MyContext } from './MyContext';
 import { createRefreshToken, createAccessToken } from './auth';
-import { isAuth } from './isAuth';
+import { isAuth } from './middleware/isAuth';
 
 @ObjectType()
 class LoginResponse {
