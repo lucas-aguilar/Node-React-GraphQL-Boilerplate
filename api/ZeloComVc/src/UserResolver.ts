@@ -14,8 +14,10 @@ import { hash, compare } from 'bcryptjs';
 
 import { User } from './entity/User';
 import { MyContext } from './MyContext';
-import { createRefreshToken, createAccessToken } from './auth';
+import { createRefreshToken, createAccessToken } from './util/auth';
 import { isAuth } from './middleware/isAuth';
+import { sendRefreshToken } from './util/sendRefreshToken';
+import { getConnection } from 'typeorm';
 
 @ObjectType()
 class LoginResponse {
@@ -35,6 +37,17 @@ export class UserResolver {
   @Query(() => [User])
   users() {
     return User.find();
+  }
+
+  @Mutation(() => Boolean)
+  async revokeRefreshTokensForUser(
+    @Arg('userId', () => String) userId: string
+  ) {
+    await getConnection()
+      .getRepository(User)
+      .increment({ id: userId }, 'tokenVersion', 1);
+
+    return true;
   }
 
   @Mutation(() => Boolean)
@@ -73,9 +86,7 @@ export class UserResolver {
       throw new Error('Password incorrect.');
     }
 
-    res.cookie('jid', createRefreshToken(user), {
-      httpOnly: true,
-    });
+    sendRefreshToken(res, createRefreshToken(user));
 
     return {
       accessToken: createAccessToken(user),
