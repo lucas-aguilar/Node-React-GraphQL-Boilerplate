@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useLoginMutation } from '../generated/graphql';
+import { useLoginMutation, MeDocument, MeQuery } from '../generated/graphql';
 import { RouteComponentProps } from 'react-router-dom';
 import { setAccessToken, getAccessToken } from '../accessToken';
 
 interface LoginProps {}
 
-export const Login: React.FC<RouteComponentProps> = ({}) => {
+export const Login: React.FC<RouteComponentProps> = ({ history }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [login] = useLoginMutation();
@@ -14,30 +14,38 @@ export const Login: React.FC<RouteComponentProps> = ({}) => {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        console.log('submitted');
-        console.log(email, password);
         try {
           const response = await login({
             variables: {
               email,
               password,
             },
+            update: (store, { data }) => {
+              if (!data) {
+                return null;
+              }
+              store.writeQuery<MeQuery>({
+                query: MeDocument,
+                data: {
+                  me: data.login.user,
+                },
+              });
+            },
           });
-          console.log('response:');
-          console.log(response);
-
           if (response && response.data) {
             setAccessToken(response.data.login.accessToken);
           }
         } catch (err) {
           console.log(err);
         }
+        history.push('/');
       }}
     >
       <h1>register page</h1>
       <div>
         <input
-          type="email"
+          type="text"
+          // type="email"
           placeholder="email"
           onChange={(e) => {
             setEmail(e.target.value);

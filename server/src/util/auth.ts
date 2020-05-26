@@ -9,11 +9,13 @@ export const createAccessToken = (user: User) => {
 };
 
 export const createRefreshToken = (user: User) => {
+  console.log('user');
+  console.log(user);
   return sign(
     { userId: user.id, tokenVersion: user.tokenVersion },
     process.env.REFRESH_TOKEN_SECRET!,
     {
-      expiresIn: '15m',
+      expiresIn: '7d',
     }
   );
 };

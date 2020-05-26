@@ -39,16 +39,15 @@ const startServer = async () => {
     }
 
     // USE PAYLOAD TO LOAD AN USER
-    const user = await User.findOne(payload.UserId);
+    console.log('payload:');
+    console.log(payload);
+    const user = await User.findOne(payload.userId);
+    console.log('user:');
+    console.log(user);
     if (!user) {
       return res.send({ ok: false, accessToken: '' });
     }
 
-    console.log('payload.tokenVersion:');
-    console.log(payload.tokenVersion);
-
-    console.log('user.tokenVersion:');
-    console.log(user.tokenVersion);
     if (user.tokenVersion !== payload.tokenVersion) {
       return res.send({ ok: false, accessToken: '' });
     }
