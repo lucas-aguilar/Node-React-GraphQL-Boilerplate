@@ -68,6 +68,15 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
+  async logout(@Ctx() { res }: MyContext) {
+    sendRefreshToken(res, '');
+    // can also use res.clearCookie
+    // but better to use custom
+    // to make sure the cookie name and http-only are set correctly
+    return true;
+  }
+
+  @Mutation(() => Boolean)
   async revokeRefreshTokensForUser(
     @Arg('userId', () => String) userId: string
   ) {
